@@ -27,12 +27,16 @@ public class Server implements Runnable {
 	@Override
 	public void run() {
 		try {
+			
 			// Keep a socket open to listen to all the UDP trafic that is
 			// destined for this port
 			socket = new DatagramSocket(8888, InetAddress.getByName("0.0.0.0"));
 			socket.setBroadcast(true);
+			
+			long start = System.currentTimeMillis();
+			long end = start + 60*1000; // 60 seconds * 1000 ms/sec
 
-			while (true) {
+			while (System.currentTimeMillis() < end) {
 				System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
 
 				// Receive a packet
@@ -59,6 +63,8 @@ public class Server implements Runnable {
 							getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
 				}
 			}
+			
+			System.out.println(getClass().getName() + ">>>Stopped accepting incoming connections");
 		} catch (IOException ex) {
 			Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
 		}
