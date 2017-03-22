@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * @author Ashutosh Singh
- * Certain sections of this code is from Michiel De Mey 
+ * @author Ashutosh Singh Certain sections of this code is from Michiel De Mey
  *         1. Open a socket on the server that listens to the UDP requests.
  *         (I’ve chosen 8888) 2. Make a loop that handles the UDP requests and
  *         responses 3. Inside the loop, check the received UPD packet to see if
@@ -23,20 +23,18 @@ import java.util.logging.Logger;
 public class Server implements Runnable {
 
 	DatagramSocket socket;
+	private volatile boolean exit = false;
 
 	@Override
 	public void run() {
 		try {
-			
-			// Keep a socket open to listen to all the UDP trafic that is
+
+			// Keep a socket open to listen to all the UDP traffic that is
 			// destined for this port
 			socket = new DatagramSocket(8888, InetAddress.getByName("0.0.0.0"));
 			socket.setBroadcast(true);
-			
-			long start = System.currentTimeMillis();
-			long end = start + 60*1000; // 60 seconds * 1000 ms/sec
 
-			while (System.currentTimeMillis() < end) {
+			while (!exit) {
 				System.out.println(getClass().getName() + ">>>Ready to receive broadcast packets!");
 
 				// Receive a packet
@@ -63,20 +61,36 @@ public class Server implements Runnable {
 							getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
 				}
 			}
-			
-			System.out.println(getClass().getName() + ">>>Stopped accepting incoming connections");
+
 		} catch (IOException ex) {
 			Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 
-	public static void main(String[] args) {
-		Thread server = new Thread(Server.getInstance());
-		server.start();
+	@SuppressWarnings("deprecation")
+	public static void main(String[] args) throws InterruptedException {
+		try {
+			
+			Thread server = new Thread(Server.getInstance());
+			server.start();
+			System.out.println("stopping Server thread");
+			
+			TimeUnit.MINUTES.sleep(1);
+			server.stop();
+			System.out.println("Server >>>Stopped accepting incoming connections");
+		} catch (InterruptedException ex) {
+			Thread.currentThread().interrupt(); // very important
+			System.out.println("Server >>>Stopped accepting incoming connections");
+			// break;
+		}
 	}
 
 	public static Server getInstance() {
 		return ServerThreadHolder.INSTANCE;
+	}
+
+	public void stop() {
+		exit = true;
 	}
 
 	private static class ServerThreadHolder {
