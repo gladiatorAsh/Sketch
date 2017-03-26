@@ -75,7 +75,7 @@ public class Server implements Runnable {
 			server.start();
 			System.out.println("stopping Server thread");
 			
-			TimeUnit.MINUTES.sleep(1);
+			TimeUnit.MINUTES.sleep(3);
 			server.stop();
 			System.out.println("Server >>>Stopped accepting incoming connections");
 		} catch (InterruptedException ex) {
