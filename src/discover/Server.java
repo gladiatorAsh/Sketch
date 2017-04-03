@@ -1,29 +1,36 @@
-/**
- * 
- */
 package discover;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 /**
- * @author Ashutosh Singh Certain sections of this code is from Michiel De Mey
- *         1. Open a socket on the server that listens to the UDP requests.
- *         (I’ve chosen 8888) 2. Make a loop that handles the UDP requests and
- *         responses 3. Inside the loop, check the received UPD packet to see if
- *         it’s valid 4. Still inside the loop, send a response to the IP and
- *         Port of the received packet
+ * @author Ashutosh Singh 
+ * Code created with the help of from Michiel De Mey's blog
+ * http://michieldemey.be/blog/network-discovery-using-udp-broadcast/
+ * 1. Open a socket on the server that listens to the UDP requests.(I’ve chosen 8888) 
+ * 2. Make a loop that handles the UDP requests and responses 
+ * 3. Inside the loop, check the received UPD packet to see if it’s valid 
+ * 4. Still inside the loop, send a response to the IP and Port of the received packet
  * 
  */
 public class Server implements Runnable {
-
+	Boolean isWrite=false;
 	DatagramSocket socket;
 	private volatile boolean exit = false;
+	static ArrayList<String> addresses = new ArrayList<String>();
 
 	@Override
 	public void run() {
@@ -47,6 +54,8 @@ public class Server implements Runnable {
 						+ packet.getAddress().getHostAddress());
 				System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
 
+				addresses.add(packet.getAddress().getHostAddress());
+
 				// See if the packet holds the right command (message)
 				String message = new String(packet.getData()).trim();
 				if (message.equals("DISCOVER_FUIFSERVER_REQUEST")) {
@@ -56,7 +65,7 @@ public class Server implements Runnable {
 					DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, packet.getAddress(),
 							packet.getPort());
 					socket.send(sendPacket);
-
+					addresses.add(sendPacket.getAddress().getHostAddress());
 					System.out.println(
 							getClass().getName() + ">>>Sent packet to: " + sendPacket.getAddress().getHostAddress());
 				}
@@ -70,18 +79,20 @@ public class Server implements Runnable {
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws InterruptedException {
 		try {
-			
+
 			Thread server = new Thread(Server.getInstance());
 			server.start();
+			Timer timer=new Timer();
+			timer.schedule(new Writer(addresses), 20000);
 			System.out.println("stopping Server thread");
+
+			//System.out.println("Server >>>Stopped accepting incoming connections");
+			server.interrupt();
 			
-			TimeUnit.MINUTES.sleep(3);
-			server.stop();
-			System.out.println("Server >>>Stopped accepting incoming connections");
-		} catch (InterruptedException ex) {
-			Thread.currentThread().interrupt(); // very important
-			System.out.println("Server >>>Stopped accepting incoming connections");
-			// break;
+			
+		}
+		finally{
+			//
 		}
 	}
 
@@ -96,5 +107,4 @@ public class Server implements Runnable {
 	private static class ServerThreadHolder {
 		private static final Server INSTANCE = new Server();
 	}
-
 }

@@ -12,8 +12,8 @@ import java.util.logging.Logger;
 
 /**
  * @author Ashutosh Singh
- * Certain sections of this code is from Michiel De Mey 
- *
+ * Code created with the help of from Michiel De Mey's blog
+ * http://michieldemey.be/blog/network-discovery-using-udp-broadcast/
  *
  */
 
@@ -28,16 +28,6 @@ public class Client {
 
 			byte[] sendData = "DISCOVER_FUIFSERVER_REQUEST".getBytes();
 
-			// Try the 255.255.255.255 first
-			/*
-			try {
-				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
-						InetAddress.getByName("255.255.255.255"), 8888);
-				c.send(sendPacket);
-				System.out.println(Client.class.getName() + ">>> Request packet sent to: 255.255.255.255 (DEFAULT)");
-			} catch (Exception e) {
-			}
-			*/
 			// Broadcast the message over all the network interfaces
 			Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
 			while (interfaces.hasMoreElements()) {
@@ -53,7 +43,9 @@ public class Client {
 					//System.out.println("Name-->"+networkInterface.getName());
 					
 					InetAddress broadcast = interfaceAddress.getBroadcast();
-					if (broadcast == null) {
+					//Hack: Manually excluding addresses starting with 10 and 192
+					//ToDo: Make broadcast over LAN address less crude.
+					if (broadcast == null || broadcast.getHostAddress().startsWith("10.") || broadcast.getHostAddress().startsWith("192.") ) {
 						continue;
 					}
 
