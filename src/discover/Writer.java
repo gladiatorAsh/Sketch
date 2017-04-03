@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TimerTask;
 
 import org.json.simple.JSONArray;
@@ -12,12 +14,12 @@ import org.json.simple.JSONObject;
 
 public class Writer extends TimerTask {
 
-	static ArrayList<String> addresses = new ArrayList<String>();
+	static Set<String> addresses = new HashSet<>();
 	String filePath="C:\\netty-pipe3.tar\\netty-pipe3\\runtime\\route-6.conf";
 	
-	public Writer(ArrayList<String> add) {
+	public Writer(Set<String> addresses2) {
 		// TODO Auto-generated constructor stub
-		addresses = add;
+		addresses = addresses2;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -32,7 +34,8 @@ public class Writer extends TimerTask {
 			System.out.println("SD");
 			JSONObject obj = new JSONObject();
 			System.out.println("1");
-			obj.put("nodeId", 1);
+			String local=LocalIP.getLocalHostLANAddress().getLocalHost().toString();
+			obj.put("nodeId", local.split("\\.")[3]);
 			obj.put("internalNode", "false");
 			obj.put("heartBeatDt", 3000);
 			System.out.println("2");

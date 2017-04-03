@@ -8,6 +8,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -30,7 +32,8 @@ public class Server implements Runnable {
 	Boolean isWrite=false;
 	DatagramSocket socket;
 	private volatile boolean exit = false;
-	static ArrayList<String> addresses = new ArrayList<String>();
+	//static ArrayList<String> addresses = new ArrayList<String>();
+	static Set<String> addresses = new HashSet<>();
 
 	@Override
 	public void run() {
@@ -55,7 +58,7 @@ public class Server implements Runnable {
 				System.out.println(getClass().getName() + ">>>Packet received; data: " + new String(packet.getData()));
 
 				addresses.add(packet.getAddress().getHostAddress());
-
+				
 				// See if the packet holds the right command (message)
 				String message = new String(packet.getData()).trim();
 				if (message.equals("DISCOVER_FUIFSERVER_REQUEST")) {
