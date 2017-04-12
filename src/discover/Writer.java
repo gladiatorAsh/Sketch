@@ -4,7 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TimerTask;
@@ -34,7 +34,8 @@ public class Writer extends TimerTask {
 			System.out.println("SD");
 			JSONObject obj = new JSONObject();
 			System.out.println("1");
-			String local=LocalIP.getLocalHostLANAddress().getLocalHost().toString();
+			LocalIP.getLocalHostLANAddress();
+			String local=InetAddress.getLocalHost().toString();
 			obj.put("nodeId", local.split("\\.")[3]);
 			obj.put("internalNode", "false");
 			obj.put("heartBeatDt", 3000);
